@@ -125,7 +125,32 @@ public class MangaKSource : IComicSource, IRequiresHttpClient
         CancellationToken ct = default
     )
     {
-        throw new NotImplementedException();
+        string chaptersUrl = $"{ApiUrl}/titles/{comicId}/chapters";
+
+        var chaptersResult = (await GetFromApiAsync<ChaptersResponse>(chaptersUrl, ct))
+            ?.Data
+            .Chapters;
+
+        if (chaptersResult is not { Length: > 0 })
+            return Array.Empty<Chapter>();
+
+        // MangaK returns chapters in descending order (newest first).
+        // Reverse to get chronological order (oldest first).
+        var chapters = chaptersResult
+            .Reverse()
+            .Select(c => new Chapter(
+                Id: c.Id,
+                Title: c.Title,
+                Number: null,
+                Volume: null,
+                Language: language,
+                Groups: Array.Empty<string>(),
+                LastUpdate: DateOnly.FromDateTime(c.UpdatedAt.DateTime),
+                Pages: null
+            ))
+            .ToList();
+
+        return chapters;
     }
 
     public async Task<IReadOnlyList<ChapterPage>> GetChapterPagesAsync(
