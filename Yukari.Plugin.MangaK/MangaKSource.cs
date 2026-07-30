@@ -45,8 +45,10 @@ public class MangaKSource : IComicSource, IRequiresHttpClient
         {
             ["page"] = [page.ToString()],
             ["limit"] = [DefaultPageSize.ToString()],
-            ["q"] = [query],
         };
+
+        if (!string.IsNullOrWhiteSpace(query))
+            queryParams["q"] = [query];
 
         foreach (var kvp in filters)
             queryParams[kvp.Key] = kvp.Value.ToArray();
@@ -85,7 +87,12 @@ public class MangaKSource : IComicSource, IRequiresHttpClient
         CancellationToken ct = default
     )
     {
-        throw new NotImplementedException();
+        var trendingFilters = new Dictionary<string, IReadOnlyList<string>>(filters)
+        {
+            ["sort"] = ["views_7days"],
+        };
+
+        return await SearchAsync(string.Empty, trendingFilters, page, ct);
     }
 
     public async Task<Comic?> GetDetailsAsync(string comicId, CancellationToken ct = default)
