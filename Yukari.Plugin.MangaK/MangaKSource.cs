@@ -97,7 +97,26 @@ public class MangaKSource : IComicSource, IRequiresHttpClient
 
     public async Task<Comic?> GetDetailsAsync(string comicId, CancellationToken ct = default)
     {
-        throw new NotImplementedException();
+        string detailsUrl = $"{ApiUrl}/titles/{comicId}";
+
+        var detailsResult = (await GetFromApiAsync<DetailsResponse>(detailsUrl, ct))?.Data.Comic;
+
+        if (detailsResult is null)
+            return null;
+
+        return new Comic(
+            Id: detailsResult.Id,
+            ComicUrl: $"{BaseUrl}/{detailsResult.Slug}",
+            Slug: null,
+            Title: detailsResult.Title,
+            Author: detailsResult.Authors.FirstOrDefault()?.Name,
+            Description: detailsResult.Description,
+            Tags: detailsResult.Genres.Select(t => t.Name).ToArray(),
+            Year: int.TryParse(detailsResult.Year, out int y) ? y : null,
+            CoverImageUrl: detailsResult.CoverUrl,
+            Langs: [SourceLanguage],
+            Status: GetComicStatus(detailsResult.Status)
+        );
     }
 
     public async Task<IReadOnlyList<Chapter>> GetAllChaptersAsync(
@@ -149,6 +168,16 @@ public class MangaKSource : IComicSource, IRequiresHttpClient
 
         return await response.Content.ReadFromJsonAsync<T>(ct);
     }
+
+    private static ComicStatus GetComicStatus(string? status) =>
+        status switch
+        {
+            "Completed" => ComicStatus.Completed,
+            "Ongoing" => ComicStatus.Ongoing,
+            "Hiatus" => ComicStatus.Hiatus,
+            "Cancelled" => ComicStatus.Cancelled,
+            _ => ComicStatus.Unknown,
+        };
 
     private static string ToQueryString(Dictionary<string, string[]> source) =>
         string.Join(
