@@ -8,7 +8,7 @@ namespace Yukari.Plugin.MangaK;
 
 [ComicSourceMetadata(
     "MangaK",
-    "0.1.0-Alpha+core2.4.0",
+    "1.0.0+core2.4.0",
     "https://github.com/Yukari-App/Plugin.MangaK/releases",
     "https://mangak.io/static/sites/mangak/icons/favicon-32x32.png",
     "A free manga reading platform with thousands of manga, manhwa, and manhua chapters."
