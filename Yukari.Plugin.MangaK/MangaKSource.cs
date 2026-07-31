@@ -181,7 +181,7 @@ public class MangaKSource : IComicSource, IRequiresHttpClient
             return null;
 
         using var request = new HttpRequestMessage(HttpMethod.Get, imageUrl);
-        request.Headers.Add("Referer", BaseUrl);
+        request.Headers.Add("Referer", "https://mangak.io");
 
         using var response = await _httpClient!.SendAsync(request, ct);
 
