@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using HtmlAgilityPack;
 using Yukari.Core.Models;
 using Yukari.Core.Sources;
 using Yukari.Plugin.MangaK.Data;
