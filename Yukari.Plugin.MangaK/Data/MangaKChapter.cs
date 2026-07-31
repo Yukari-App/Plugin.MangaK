@@ -6,5 +6,6 @@ internal record MangaKChapter(
     [property: JsonPropertyName("id")] string Id,
     [property: JsonPropertyName("slug")] string Slug,
     [property: JsonPropertyName("name")] string Title,
-    [property: JsonPropertyName("updated_at")] DateTimeOffset UpdatedAt
+    [property: JsonPropertyName("updated_at")] DateTimeOffset UpdatedAt,
+    [property: JsonPropertyName("images")] string[] Pages
 );
