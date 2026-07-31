@@ -27,8 +27,7 @@ public class MangaKSource : IComicSource, IRequiresHttpClient
     public IReadOnlyDictionary<string, string> Languages =>
         _languages ??= new Dictionary<string, string> { { "en", "English" } };
 
-    private const string BaseUrl = "https://mangak.io";
-    private const string ApiUrl = "https://api.mangak.io";
+    private const string BaseUrl = "https://api.mangak.io";
 
     private ISharedHttpClient? _httpClient;
 
@@ -53,7 +52,7 @@ public class MangaKSource : IComicSource, IRequiresHttpClient
         foreach (var kvp in filters)
             queryParams[kvp.Key] = kvp.Value.ToArray();
 
-        string searchUrl = $"{ApiUrl}/titles/search?{ToQueryString(queryParams)}";
+        string searchUrl = $"{BaseUrl}/titles/search?{ToQueryString(queryParams)}";
 
         var searchResults = (await GetFromApiAsync<SearchResponse>(searchUrl, ct))?.Data.Comics;
 
@@ -97,7 +96,7 @@ public class MangaKSource : IComicSource, IRequiresHttpClient
 
     public async Task<Comic?> GetDetailsAsync(string comicId, CancellationToken ct = default)
     {
-        string detailsUrl = $"{ApiUrl}/titles/{comicId}";
+        string detailsUrl = $"{BaseUrl}/titles/{comicId}";
 
         var detailsResult = (await GetFromApiAsync<DetailsResponse>(detailsUrl, ct))?.Data.Comic;
 
@@ -106,7 +105,7 @@ public class MangaKSource : IComicSource, IRequiresHttpClient
 
         return new Comic(
             Id: detailsResult.Id,
-            ComicUrl: $"{BaseUrl}/{detailsResult.Slug}",
+            ComicUrl: $"https://mangak.io/{detailsResult.Slug}",
             Slug: null,
             Title: detailsResult.Title,
             Author: detailsResult.Authors.FirstOrDefault()?.Name,
@@ -125,7 +124,7 @@ public class MangaKSource : IComicSource, IRequiresHttpClient
         CancellationToken ct = default
     )
     {
-        string chaptersUrl = $"{ApiUrl}/titles/{comicId}/chapters";
+        string chaptersUrl = $"{BaseUrl}/titles/{comicId}/chapters";
 
         var chaptersResult = (await GetFromApiAsync<ChaptersResponse>(chaptersUrl, ct))
             ?.Data
@@ -159,7 +158,22 @@ public class MangaKSource : IComicSource, IRequiresHttpClient
         CancellationToken ct = default
     )
     {
-        throw new NotImplementedException();
+        string pagesUrl = $"{BaseUrl}/titles/{comicId}/chapters/{chapterId}";
+
+        var chapterResult = (await GetFromApiAsync<ChapterDetailsResponse>(pagesUrl, ct))
+            ?.Data
+            .Chapter;
+
+        if (chapterResult is not { Pages.Length: > 0 })
+            return Array.Empty<ChapterPage>();
+
+        var pages = new List<ChapterPage>(chapterResult.Pages.Length);
+        for (int i = 0; i < chapterResult.Pages.Length; i++)
+        {
+            pages.Add(new ChapterPage(Number: i + 1, ImageUrl: chapterResult.Pages[i]));
+        }
+
+        return pages;
     }
 
     public async Task<byte[]?> GetImageBytesAsync(string imageUrl, CancellationToken ct = default)
