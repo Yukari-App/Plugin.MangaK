@@ -2,13 +2,14 @@ using System.Net;
 using System.Net.Http.Json;
 using Yukari.Core.Models;
 using Yukari.Core.Sources;
+using Yukari.Core.Sources.Http;
 using Yukari.Plugin.MangaK.Data;
 
 namespace Yukari.Plugin.MangaK;
 
 [ComicSourceMetadata(
     "MangaK",
-    "1.0.0+core2.4.0",
+    "1.1.0+core2.5.0",
     "https://github.com/Yukari-App/Plugin.MangaK/releases",
     "https://mangak.io/static/sites/mangak/icons/favicon-32x32.png",
     "A free manga reading platform with thousands of manga, manhwa, and manhua chapters."
@@ -200,7 +201,6 @@ public class MangaKSource : IComicSource, IRequiresHttpClient
                 return new Comic(
                     Id: result.Id,
                     ComicUrl: null,
-                    Slug: null,
                     Title: result.Title,
                     Author: null,
                     Description: null,
@@ -241,7 +241,6 @@ public class MangaKSource : IComicSource, IRequiresHttpClient
         return new Comic(
             Id: detailsResult.Id,
             ComicUrl: $"https://mangak.io/{detailsResult.Slug}",
-            Slug: null,
             Title: detailsResult.Title,
             Author: detailsResult.Authors.FirstOrDefault()?.Name,
             Description: detailsResult.Description,
